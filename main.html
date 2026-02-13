@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EASTER EGG: mILUJU TĚ BĚTKO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .pin-display {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .pin-display p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .pin-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .pin-box {
+            width: 50px;
+            height: 60px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #f5576c;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .pin-box.empty {
+            background: rgba(255,255,255,0.5);
+            color: #ccc;
+        }
+
+        .pin-box.filled {
+            animation: fillIn 0.5s ease;
+        }
+
+        @keyframes fillIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+            transition: width 0.5s ease;
+        }
+
+        .level-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .level-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .level-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border-color: #f5576c;
+        }
+
+        .level-card.completed {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            border-color: #4CAF50;
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .level-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .level-status {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .level-status.empty {
+            background: white;
+            border: 2px solid #ddd;
+            color: #999;
+        }
+
+        .level-status.filled {
+            background: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .level-description {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Modal pro šifru */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: #e0e0e0;
+            transform: rotate(90deg);
+        }
+
+        .cipher-content {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .cipher-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .answer-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #ddd;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #f5576c;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.success {
+            background: #d4fc79;
+            color: #2d5016;
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        .feedback.error {
+            background: #ff6b6b;
+            color: white;
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .victory-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .victory-screen.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .victory-screen h2 {
+            font-size: 32px;
+            color: #f5576c;
+            margin-bottom: 20px;
+        }
+
+        .confetti {
+            font-size: 60px;
+            margin: 20px 0;
+        }
+
+        .final-pin {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .final-pin h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .final-pin-number {
+            font-size: 48px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            margin: 15px 0;
+        }
+
+        .hint-btn {
+            background: #ffd93d;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .hint-btn:hover {
+            background: #ffc107;
+            transform: scale(1.05);
+        }
+
+        .hint-text {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff9e6;
+            border-left: 4px solid #ffd93d;
+            border-radius: 5px;
+        }
+
+        .hint-text.visible {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        @media (max-width: 600px) {
+            .pin-box {
+                width: 40px;
+                height: 50px;
+                font-size: 24px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>šifra mistra Blbonarda</h1>
+            <p>s Lásko z Miami, Šifra do dlani #Lil_Školník</p>
+            
+            <div class="pin-display">
+                <p>Kód pro převzetí zásilky:</p>
+                <div class="pin-boxes" id="pinDisplay">
+                    <div class="pin-box empty">?</div>
+                    <div class="pin-box empty">?</div>
+                    <div class="pin-box empty">?</div>
+                    <div class="pin-box empty">?</div>
+                    <div class="pin-box empty">?</div>
+                    <div class="pin-box empty">?</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+
+            <div class="level-grid" id="levelGrid">
+                <!-- Levely se vygenerují JavaScriptem -->
+            </div>
+
+            <div class="victory-screen" id="victoryScreen">
+                <div class="confetti">🎉 🎊 💝 🎊 🎉</div>
+                <h2>GRATULKY, JSTE ŠIKULKY!</h2>
+                <p style="font-size: 18px; margin: 20px 0;">asi jsi sama, ale to se mi nehodilo do rýmu </p>
+                
+                <div class="final-pin">
+                    <h3>Váš kód pro převzetí:</h3>
+                    <div class="final-pin-number">284705</div>
+                    <p style="margin-top: 15px;">Tento kód použij na výdejním místě PPL:</p>
+                    <p style="font-weight: bold; margin-top: 10px;"> Allure nails & beauty</p>
+                    <p>Bucharova 2641/14, Praha 13 - Stodůlky</p>
+                </div>
+
+                <p style="margin-top: 30px; color: #666;">
+                    Miluju tě šíleně moc lásko moje nejkrásnější!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pro šifry -->
+    <div class="modal" id="cipherModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2 id="modalTitle">Level 1</h2>
+            
+            <div class="cipher-content" id="cipherContent">
+                <!-- Obsah šifry se načte dynamicky -->
+            </div>
+
+            <div class="answer-section">
+                <label for="answerInput"><strong>Zadejte jednu číslici (0-9):</strong></label>
+                <input 
+                    type="number" 
+                    id="answerInput" 
+                    class="answer-input" 
+                    min="0" 
+                    max="9" 
+                    maxlength="1"
+                    placeholder="?"
+                >
+                <button class="submit-btn" onclick="checkAnswer()">Zkontrolovat odpověď</button>
+                <div class="feedback" id="feedback"></div>
+                
+                <button class="hint-btn" onclick="toggleHint()">💡 Potřebujete nápovědu?</button>
+                <div class="hint-text" id="hintText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // KONFIGURACE HRY
+        const CORRECT_PIN = "284705"; // Správný kód
+        
+        // Definice levelů s šiframi
+        const levels = [
+            {
+                id: 1,
+                title: "Level 1: Asasino Kapučíno",
+                description: "Miluju Tě",
+                cipher: `
+                    <h3>Ahoj zlato! </h3>
+                    <p style="margin: 20px 0;">"Jsme lepší, že jsme v Budapešti byly první" - vítr</p>
+                    <p style="font-size: 18px; font-weight: bold; color: #f5576c;">
+                        Když jsme společně byly v budapešti, Kolik mi vypadlo v noci zubů, když jsme spali.
+                    </p>
+                    <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                        "a tak nedávej si borovičku,
+                        jinak budeš mít zubů polovičku"
+                    </p>
+                `,
+                answer: "2",
+                hint: "Myslim že nebudeš potřebovat nápovědu, ale jestli jo tak tady: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            },
+            {
+                id: 2,
+                title: "Level 2: Kulturní divas",
+                description: "Rijskmuseum more like MilskujuBětkum",
+                cipher: `
+                    <h3>Milovníci kultury</h3>
+                    <p style="margin: 20px 0;">"Ty maj spolu ale dobrej fit" - všichni v Cafe Welling </p>
+                    <p style="font-size: 16px; margin: 15px 0;">
+                        Pod stužkou najdete lístek s rovnicí:
+                    </p>
+                    <div style="background: white; padding: 20px; border-radius: 10px; font-size: 24px; font-weight: bold;">
+                        Když jsme byly v Rijskmuseum, procházeli jsme okolo nejznámějšího obrazu, proveď následující matematickou operaci, na jeho datumu namalování:
+                    </div>
+                    <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                        První číslice: x    X   Druhá číslice: x  +
+                        Třetí číslice: x    -   Čtvrtá číslice: x = ?
+                    </p>
+                `,
+                answer: "8",
+                hint: "JEŽIŠ ŠMARJA, to jsem ale unavenej, doprkýnka, jak je noc, šnarja pano, a musím hlídkovat... Hergot Rembrant."
+            },
+            {
+                id: 3,
+                title: "Level 3: Mrtvice",
+                description: "pamatuješ když jsme spolu byly tuff na zdravotaku?",
+                cipher: `
+                    <h3>📚 Hledání v knihovně</h3>
+                    <p style="margin: 20px 0;">Vypadáš jako moje první žena</p>
+                    <p style="margin: 20px 0;">Ty tedka určitě: "Cožeeee kolik si měl žen jako</p>
+                    <p style="font-size: 16px; margin: 15px 0;">já (jako skibidi sigma): nula https://www.youtube.com/watch?v=TFdvfrWS7XQ </p>
+                    <div style="background: #ffe5e5; padding: 20px; border-radius: 10px; border: 2px dashed #f5576c;">
+                        <p style="font-size: 28px; margin: 15px 0; letter-spacing: 5px;">
+                            tetete temilujumiluju milujutetemiluju tetete milujumilujumilujute miluju temilujumiluju lasko milujutetete miluju lasko temilujutemiluju te temilujutete milujutemiluju milujumiluju
+                        </p>
+                    </div>
+                `,
+                answer: "4",
+                hint: "Ale to by pak nebyla sranda, nebo jo? ... -- .-. .- -.. --- -.-. .... ..-"
+            },
+            {
+                id: 4,
+                title: "Level 4: akademická zbran",
+                description: "Má Láska pro Tebe, je větší než moje nenávist pro chemii, a to je co říct...",
+                cipher: `
+                    <h3>Periodická tabulka prdů</h3>
+                    <p style="margin: 20px 0;">Najděte na chodbě speciální tabulku.</p>
+                    <div style="background: white; padding: 20px; border-radius: 10px; border: 3px solid #f5576c;">
+                        <table style="width: 100%; text-align: center; font-size: 18px;">
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd;">lutecium</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;">carboneum</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;">kalium</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd;">yttrium</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;">selenium</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;">vanadium</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd;">erbium</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;">nitrogenium</td>
+                                <td style="padding: 10px; border: 1px solid #ddd;">nitrogenium</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <p style="margin-top: 15px; font-weight: bold;">
+                       
+                    </p>
+                `,
+                answer: "7",
+                hint: "Pomohla by paní učitelka Koutníková, si tak myslim"
+            },
+            {
+                id: 5,
+                title: "Level 5: Frenk v indii",
+                description: "kdyby jsme spolu nebyly, tak bych tě hledal, jako frenk hledal hajzl v indii #rizz",
+                cipher: `
+                    <h3> Geografická šífra</h3>
+                    <p style="margin: 20px 0;">get it? dobrá hříčka slov</p>
+                    <div style="background: white; padding: 20px; border-radius: 10px; border: 2px solid #667eea;">
+                        <p style="font-size: 16px; margin-bottom: 10px;"> Zeměpisná šířka:</p>
+                        <p style="font-size: 24px; font-weight: bold; color: #667eea;">27°29′33° S</p>
+                        <p style="font-size: 16px; margin: 20px 0 10px 0;"> Zeměpisná délka:</p>
+                        <p style="font-size: 24px; font-weight: bold; color: #764ba2;">77°40′23 V</p>
+                    </div>
+                    <p style="margin-top: 20px; font-weight: bold;">
+                        Co je _________?
+                    </p>
+                `,
+                answer: "0",
+                hint: "jak se to město jmenuje? a jaký číslo by mohlo bejt?"
+            },
+            {
+                id: 6,
+                title: "Level 6: Final Chalange",
+                description: "Miluju tě jako ryba vodu, jako kůn seno, jako kurak cigaretu, jako najbert nactilety",
+                cipher: `
+                    <h3>Klíčová otázka</h3>
+                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; border-radius: 15px;">
+                        </p>
+                        <p style="font-size: 32px; font-weight: bold; margin: 15px 0;">
+                            Kdy je naše výročí?
+                        </p>
+                        <p style="font-size: 18px; margin-top: 15px;">
+                        </p>
+                    </div>
+                    <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                        Pokud by bylo v 14:20:06, Tak by si napsala 14 x 20 / 06 x 10 = 466.666... to není správná odpověd, to by bylo trapné"
+                        25 - 25 = ?
+                    </p>
+                `,
+                answer: "5",
+                hint: "todle musíš dát takže místo toho tady mám video: https://www.youtube.com/watch?v=k6iRzpP8Zkk"
+            }
+        ];
+
+        // Stav hry (uložen v localStorage)
+        let gameState = {
+            answers: {},
+            completed: []
+        };
+
+        let currentLevel = null;
+
+        // Načtení hry při startu
+        window.onload = function() {
+            loadGameState();
+            renderLevels();
+            updatePinDisplay();
+            updateProgress();
+        };
+
+        // Načtení stavu ze storage
+        function loadGameState() {
+            const saved = localStorage.getItem('valentineGame');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+        }
+
+        // Uložení stavu
+        function saveGameState() {
+            localStorage.setItem('valentineGame', JSON.stringify(gameState));
+        }
+
+        // Vykreslení levelů
+        function renderLevels() {
+            const grid = document.getElementById('levelGrid');
+            grid.innerHTML = '';
+
+            levels.forEach(level => {
+                const isCompleted = gameState.completed.includes(level.id);
+                const answer = gameState.answers[level.id] || '';
+
+                const card = document.createElement('div');
+                card.className = `level-card ${isCompleted ? 'completed' : ''}`;
+                card.onclick = () => openLevel(level.id);
+
+                card.innerHTML = `
+                    <div class="level-header">
+                        <div class="level-title">${level.title}</div>
+                        <div class="level-status ${answer ? 'filled' : 'empty'}">
+                            ${answer || '?'}
+                        </div>
+                    </div>
+                    <div class="level-description">${level.description}</div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Otevření levelu
+        function openLevel(levelId) {
+            currentLevel = levels.find(l => l.id === levelId);
+            if (!currentLevel) return;
+
+            document.getElementById('modalTitle').textContent = currentLevel.title;
+            document.getElementById('cipherContent').innerHTML = currentLevel.cipher;
+            document.getElementById('answerInput').value = gameState.answers[levelId] || '';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('hintText').textContent = currentLevel.hint;
+            document.getElementById('hintText').classList.remove('visible');
+
+            document.getElementById('cipherModal').classList.add('active');
+        }
+
+        // Zavření modalu
+        function closeModal() {
+            document.getElementById('cipherModal').classList.remove('active');
+            currentLevel = null;
+        }
+
+    // Kontrola odpovědi
+    function checkAnswer() {
+        if (!currentLevel) return;
+
+        const input = document.getElementById('answerInput');
+        const userAnswer = input.value.trim();
+        const feedback = document.getElementById('feedback');
+
+        if (userAnswer === currentLevel.answer) {
+            // Správná odpověď - náhodný feedback
+            const successMessages = [
+                'Člověk tak úžasný jako ty, by to špatně ani neuměl!',
+                'Fabulozni prace!',
+                'Kdyby si měla znamku, tak to je 1, stejně jako ty!',
+                'skvělá práce, jsi hvězda(EBLM J0555-57Ab)',
+                'Bomba! snad nejsi na letišti...',
+                'Úžasný, Jsi nový epstinein?',
+                'IS DIDDY BLUD EINSTEIN!',
+                'TO JE ONO!',
+                'na tudle spravu je mala sance takze easter egg: Miluju tě!'
+            ];
+            
+            // Náhodný výběr zprávy
+            const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
+            
+            feedback.className = 'feedback success';
+            feedback.textContent = randomMessage;
+
+            gameState.answers[currentLevel.id] = userAnswer;
+            if (!gameState.completed.includes(currentLevel.id)) {
+                gameState.completed.push(currentLevel.id);
+            }
+
+            saveGameState();
+            updatePinDisplay();
+            updateProgress();
+            renderLevels();
+
+            // Kontrola výhry
+            if (gameState.completed.length === levels.length) {
+                setTimeout(() => {
+                    closeModal();
+                    showVictory();
+                }, 1500);
+            } else {
+                setTimeout(() => {
+                    closeModal();
+                }, 2000);
+            }
+        } else {
+            // Špatná odpověď
+            feedback.className = 'feedback error';
+            feedback.textContent = '❌ Zkuste to znovu!';
+            input.classList.add('error');
+            setTimeout(() => {
+                input.classList.remove('error');
+            }, 500);
+        }
+    }
+
+        // Zobrazení nápovědy
+        function toggleHint() {
+            const hint = document.getElementById('hintText');
+            hint.classList.toggle('visible');
+        }
+
+        // Aktualizace PIN displeje
+        function updatePinDisplay() {
+            const boxes = document.querySelectorAll('.pin-box');
+            levels.forEach((level, index) => {
+                const answer = gameState.answers[level.id];
+                if (answer) {
+                    boxes[index].textContent = answer;
+                    boxes[index].classList.remove('empty');
+                    boxes[index].classList.add('filled');
+                }
+            });
+        }
+
+        // Aktualizace progress baru
+        function updateProgress() {
+            const progress = (gameState.completed.length / levels.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Zobrazení výhry
+        function showVictory() {
+            document.getElementById('levelGrid').style.display = 'none';
+            document.getElementById('victoryScreen').classList.add('active');
+        }
+
+        // Reset hry (pro testování)
+        function resetGame() {
+            if (confirm('Opravdu chcete resetovat hru?')) {
+                localStorage.removeItem('valentineGame');
+                location.reload();
+            }
+        }
+
+        // Omezení inputu na jednu číslici
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('answerInput');
+            if (input) {
+                input.addEventListener('input', function() {
+                    if (this.value.length > 1) {
+                        this.value = this.value.slice(0, 1);
+                    }
+                });
+            }
+        });
+
+        // Zavření modalu klávesou ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
